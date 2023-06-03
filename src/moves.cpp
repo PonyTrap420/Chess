@@ -6,7 +6,7 @@
 #include "Pieces/rook.h"
 #include "Pieces/knight.h"
 
-#define Add(x,y) vec.push_back(sf::Vector2u(x, y))
+#define Add(x,y) vec.push_back({x, y, this})
 
 bool CheckBounds(int x, int y)
 {
@@ -14,7 +14,7 @@ bool CheckBounds(int x, int y)
 		return true;
 	return false;
 }
-bool IsEnemy(Game* game, int x, int y, int m_team)
+bool IsEnemy(GameModel* game, int x, int y, int m_team)
 {
 	if (CheckBounds(x, y))
 		return false;
@@ -23,17 +23,32 @@ bool IsEnemy(Game* game, int x, int y, int m_team)
 		return true;
 	return false;
 }
-
-std::vector<sf::Vector2u> Rook::ShowMoves(Game* game)
+std::vector<Move> MoveValidator(std::vector<Move>* moves, GameModel* game)
 {
-	std::vector<sf::Vector2u> vec;
+	std::vector<Move> valid_moves;
+	for (Move pos : *moves)
+	{
+		if (pos.y < 0 || pos.y >= 8 || pos.x < 0 || pos.x >= 8)
+			continue;
+
+		if (game->m_cells[pos.x][pos.y]->GetTeam() == pos.piece->GetTeam())
+			continue;
+
+		valid_moves.push_back(pos);
+	}
+	return valid_moves;
+}
+
+std::vector<Move> Rook::ShowMoves(GameModel* game)
+{
+	std::vector<Move> vec;
 
 	for (unsigned int i = 1; i < 8; i++)
 	{
 		if (CheckBounds(x, y + i))
 			break;
 
-		vec.push_back(sf::Vector2u(x, y + i));
+		vec.push_back({ x, y + i, this });
 
 		if (game->m_cells[x][y + i]->GetTeam() != -1)
 			break;
@@ -43,7 +58,7 @@ std::vector<sf::Vector2u> Rook::ShowMoves(Game* game)
 		if (CheckBounds(x, y - i))
 			break;
 
-		vec.push_back(sf::Vector2u(x, y - i));
+		vec.push_back({x, y - i , this});
 
 		if (game->m_cells[x][y - i]->GetTeam() != -1)
 			break;
@@ -53,7 +68,7 @@ std::vector<sf::Vector2u> Rook::ShowMoves(Game* game)
 		if (CheckBounds(x + i, y))
 			break;
 
-		vec.push_back(sf::Vector2u(x + i, y));
+		vec.push_back({x + i, y, this});
 
 		if (game->m_cells[x + i][y]->GetTeam() != -1)
 			break;
@@ -64,17 +79,17 @@ std::vector<sf::Vector2u> Rook::ShowMoves(Game* game)
 			break;
 
 
-		vec.push_back(sf::Vector2u(x - i, y));
+		vec.push_back({x - i, y, this});
 
 		if (game->m_cells[x - i][y]->GetTeam() != -1)
 			break;
 	}
-	return vec;
+	return MoveValidator(&vec, game);
 }
 
-std::vector<sf::Vector2u> Pawn::ShowMoves(Game* game)
+std::vector<Move> Pawn::ShowMoves(GameModel* game)
 {
-	std::vector<sf::Vector2u> vec;
+	std::vector<Move> vec;
 
 	unsigned int i = 1;
 	if (m_team == 1)
@@ -93,24 +108,24 @@ std::vector<sf::Vector2u> Pawn::ShowMoves(Game* game)
 	}
 
 	if (!canEat && !CheckBounds(x, y + i) && game->m_cells[x][y + i]->GetTeam() == -1) {
-		vec.push_back(sf::Vector2u(x, y + i));
+		vec.push_back({x, y + i, this});
 		if(m_firstMove && game->m_cells[x][y + i * 2]->GetTeam() == -1)
-			vec.push_back(sf::Vector2u(x, y + i * 2));
+			vec.push_back({x, y + i * 2, this});
 	}
 
-	return vec;
+	return MoveValidator(&vec, game);
 }
 
-std::vector<sf::Vector2u> Queen::ShowMoves(Game* game)
+std::vector<Move> Queen::ShowMoves(GameModel* game)
 {
-	std::vector<sf::Vector2u> vec;
+	std::vector<Move> vec;
 
 	for (unsigned int i = 1; i < 8; i++)
 	{
 		if (CheckBounds(x, y + i))
 			break;
 
-		vec.push_back(sf::Vector2u(x, y + i));
+		vec.push_back({x, y + i, this});
 
 		if (game->m_cells[x][y + i]->GetTeam() != -1)
 			break;
@@ -120,7 +135,7 @@ std::vector<sf::Vector2u> Queen::ShowMoves(Game* game)
 		if (CheckBounds(x, y - i))
 			break;
 
-		vec.push_back(sf::Vector2u(x, y - i));
+		vec.push_back({x, y - i, this});
 
 		if (game->m_cells[x][y - i]->GetTeam() != -1)
 			break;
@@ -130,7 +145,7 @@ std::vector<sf::Vector2u> Queen::ShowMoves(Game* game)
 		if (CheckBounds(x + i, y))
 			break;
 
-		vec.push_back(sf::Vector2u(x + i, y));
+		vec.push_back({x + i, y, this});
 
 		if (game->m_cells[x + i][y]->GetTeam() != -1)
 			break;
@@ -141,7 +156,7 @@ std::vector<sf::Vector2u> Queen::ShowMoves(Game* game)
 			break;
 
 
-		vec.push_back(sf::Vector2u(x - i, y));
+		vec.push_back({x - i, y, this});
 
 		if (game->m_cells[x - i][y]->GetTeam() != -1)
 			break;
@@ -153,7 +168,7 @@ std::vector<sf::Vector2u> Queen::ShowMoves(Game* game)
 			break;
 
 
-		vec.push_back(sf::Vector2u(x + i, y + i));
+		vec.push_back({x + i, y + i, this});
 
 		if (game->m_cells[x + i][y + i]->GetTeam() != -1)
 			break;
@@ -165,7 +180,7 @@ std::vector<sf::Vector2u> Queen::ShowMoves(Game* game)
 			break;
 
 
-		vec.push_back(sf::Vector2u(x - i, y + i));
+		vec.push_back({x - i, y + i, this});
 
 		if (game->m_cells[x - i][y + i]->GetTeam() != -1)
 			break;
@@ -177,7 +192,7 @@ std::vector<sf::Vector2u> Queen::ShowMoves(Game* game)
 			break;
 
 
-		vec.push_back(sf::Vector2u(x + i, y - i));
+		vec.push_back({x + i, y - i, this});
 
 		if (game->m_cells[x + i][y - i]->GetTeam() != -1)
 			break;
@@ -189,49 +204,49 @@ std::vector<sf::Vector2u> Queen::ShowMoves(Game* game)
 			break;
 
 
-		vec.push_back(sf::Vector2u(x - i, y - i));
+		vec.push_back({x - i, y - i, this});
 
 		if (game->m_cells[x - i][y - i]->GetTeam() != -1)
 			break;
 	}
 
 
-	return vec;
+	return MoveValidator(&vec, game);
 }
 
-std::vector<sf::Vector2u> King::ShowMoves(Game* game)
+std::vector<Move> King::ShowMoves(GameModel* game)
 {
-	std::vector<sf::Vector2u> vec;
+	std::vector<Move> vec;
 
-	vec.push_back(sf::Vector2u(x + 1, y + 1));
-	vec.push_back(sf::Vector2u(x, y + 1));
-	vec.push_back(sf::Vector2u(x - 1, y + 1));
+	vec.push_back({x + 1, y + 1, this});
+	vec.push_back({x, y + 1, this});
+	vec.push_back({x - 1, y + 1, this});
 
-	vec.push_back(sf::Vector2u(x + 1, y - 1));
-	vec.push_back(sf::Vector2u(x, y - 1));
-	vec.push_back(sf::Vector2u(x - 1, y - 1));
+	vec.push_back({x + 1, y - 1, this});
+	vec.push_back({x, y - 1, this});
+	vec.push_back({x - 1, y - 1, this});
 
-	vec.push_back(sf::Vector2u(x + 1, y));
-	vec.push_back(sf::Vector2u(x - 1, y));
+	vec.push_back({x + 1, y, this});
+	vec.push_back({x - 1, y, this});
 
-	std::vector<sf::Vector2u> rookMoves;
-	std::vector<sf::Vector2u> kingMoves;
-	std::vector<sf::Vector2u> pawnMoves;
-	std::vector<sf::Vector2u> bishopMoves;
-	std::vector<sf::Vector2u> queenMoves;
+	/*std::vector<Move> rookMoves;
+	std::vector<Move> kingMoves;
+	std::vector<Move> pawnMoves;
+	std::vector<Move> bishopMoves;
+	std::vector<Move> queenMoves;
 
-	for (sf::Vector2u pos : vec)
+	for (Move pos : vec)
 	{
-		std::vector<sf::Vector2u> enemy;
+		std::vector<Move> enemy;
 
-	}
+	}*/
 
-	return vec;
+	return MoveValidator(&vec, game);
 }
 
-std::vector<sf::Vector2u> Bishop::ShowMoves(Game* game)
+std::vector<Move> Bishop::ShowMoves(GameModel* game)
 {
-	std::vector<sf::Vector2u> vec;
+	std::vector<Move> vec;
 
 	for (unsigned int i = 1; i < 8; i++)
 	{
@@ -239,7 +254,7 @@ std::vector<sf::Vector2u> Bishop::ShowMoves(Game* game)
 			break;
 
 
-		vec.push_back(sf::Vector2u(x + i, y + i));
+		vec.push_back({x + i, y + i, this});
 
 		if (game->m_cells[x + i][y + i]->GetTeam() != -1)
 			break;
@@ -251,7 +266,7 @@ std::vector<sf::Vector2u> Bishop::ShowMoves(Game* game)
 			break;
 
 
-		vec.push_back(sf::Vector2u(x - i, y + i));
+		vec.push_back({x - i, y + i, this});
 
 		if (game->m_cells[x - i][y + i]->GetTeam() != -1)
 			break;
@@ -263,7 +278,7 @@ std::vector<sf::Vector2u> Bishop::ShowMoves(Game* game)
 			break;
 
 
-		vec.push_back(sf::Vector2u(x + i, y - i));
+		vec.push_back({x + i, y - i, this});
 
 		if (game->m_cells[x + i][y - i]->GetTeam() != -1)
 			break;
@@ -275,29 +290,29 @@ std::vector<sf::Vector2u> Bishop::ShowMoves(Game* game)
 			break;
 
 
-		vec.push_back(sf::Vector2u(x - i, y - i));
+		vec.push_back({x - i, y - i, this});
 
 		if (game->m_cells[x - i][y - i]->GetTeam() != -1)
 			break;
 	}
-	return vec;
+	return MoveValidator(&vec, game);
 }
 
-std::vector<sf::Vector2u> Knight::ShowMoves(Game* game)
+std::vector<Move> Knight::ShowMoves(GameModel* game)
 {
-	std::vector<sf::Vector2u> vec;
+	std::vector<Move> vec;
 
-	vec.push_back(sf::Vector2u(x + 1, y + 2));
-	vec.push_back(sf::Vector2u(x - 1, y + 2));
+	vec.push_back({x + 1, y + 2, this});
+	vec.push_back({x - 1, y + 2, this});
 
-	vec.push_back(sf::Vector2u(x + 2, y + 1));
-	vec.push_back(sf::Vector2u(x + 2, y - 1));	
+	vec.push_back({x + 2, y + 1, this});
+	vec.push_back({x + 2, y - 1, this});
 	
-	vec.push_back(sf::Vector2u(x - 2, y + 1));
-	vec.push_back(sf::Vector2u(x - 2, y - 1));
+	vec.push_back({x - 2, y + 1, this});
+	vec.push_back({x - 2, y - 1, this});
 
-	vec.push_back(sf::Vector2u(x + 1, y - 2));
-	vec.push_back(sf::Vector2u(x - 1, y - 2));
+	vec.push_back({x + 1, y - 2, this});
+	vec.push_back({x - 1, y - 2, this});
 
-	return vec;
+	return MoveValidator(&vec, game);
 }

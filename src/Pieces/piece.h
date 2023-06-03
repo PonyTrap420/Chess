@@ -2,6 +2,7 @@
 #include "../pch.h"
 
 class Game;
+class GameModel;
 
 constexpr unsigned int PIECE_WIDTH = 133;
 
@@ -13,6 +14,27 @@ enum PIECE_TYPE {
 	ROOK,
 	PAWN,
 	NONE,
+};
+
+class Piece;
+
+struct Move {
+	unsigned prevx;
+	unsigned prevy;
+
+	unsigned int x;
+	unsigned int y;
+	Piece* piece;
+	Piece* captured = nullptr;
+
+	Move(unsigned x, unsigned y, Piece* piece)
+	{
+		this->x = x;
+		this->y = y;
+		this->piece = piece;
+	}
+
+	Move() {};
 };
 
 class Piece
@@ -33,8 +55,8 @@ public:
 	inline void setShape(sf::RectangleShape& shape) { this->m_shape = &shape; }
 	inline void setTexture(sf::RectangleShape& texure) { this->m_textureShape = &texure; }
 
-	virtual void Move(unsigned int x, unsigned int y);
-	virtual std::vector<sf::Vector2u> ShowMoves(Game* game) = 0;
+	virtual void MovePiece(unsigned int x, unsigned int y);
+	virtual std::vector<Move> ShowMoves(GameModel* game) = 0;
 
 private:
 	sf::RectangleShape* m_shape = nullptr;
@@ -49,12 +71,11 @@ protected:
 class Empty : public Piece
 {
 public:
-
 	inline Empty(unsigned int x, unsigned int y) : Piece(x, y, NONE, -1) {};
 
-	inline std::vector<sf::Vector2u> ShowMoves(Game* game)
+	inline std::vector<Move> ShowMoves(GameModel* game)
 	{
-		std::vector<sf::Vector2u> vec;
+		std::vector<Move> vec;
 		return vec;
 	}
 private:

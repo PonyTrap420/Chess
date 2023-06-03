@@ -1,19 +1,11 @@
 #pragma once
 #include "pch.h"
+#include "MCTS/algo.h"
 #include "Pieces/piece.h"
-#include "Pieces/pawn.h"
-#include "Pieces/bishop.h"
-#include "Pieces/king.h"
-#include "Pieces/queen.h"
-#include "Pieces/rook.h"
-#include "Pieces/knight.h"
-
+#include "model.h"
 
 #define BLACK 0
 #define WHITE 1
-
-constexpr unsigned int BOARD_WIDTH = 8;
-constexpr unsigned int BOARD_HEIGHT = 8;
 
 enum DrawState {
 	Board,
@@ -27,16 +19,19 @@ public:
 	DrawState m_state;
 
 	Game(sf::RenderWindow& window, unsigned int rows, unsigned int cols);
-	void InitBoard();
 
 	void MousePressed();
 	void CellPressed(int row, int col);
 
-	Piece* m_cells[BOARD_HEIGHT][BOARD_WIDTH];
+	GameModel* m_model;
+	MCTS m_mcts;
+	sf::Music m_player;
+	bool winner;
+
 private:
 	virtual void Game::draw(sf::RenderTarget& target, sf::RenderStates states) const;
 
-	void Selected(unsigned int row, unsigned int col);
+	void MovePiece(Move& m);
 	void ResetBoard();
 	void SwapPieces(Piece* p, Piece* p2);
 
@@ -46,6 +41,5 @@ private:
 
 	sf::Texture m_tileset;
 
-	bool turn;
 	Piece* m_selected = nullptr;
 };

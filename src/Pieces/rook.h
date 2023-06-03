@@ -8,6 +8,6 @@ public:
 
 	inline Rook(unsigned int x, unsigned int y, int team) : Piece(x,y,ROOK, team) {};
 
-	std::vector<sf::Vector2u> ShowMoves(Game* game);
+	std::vector<Move> ShowMoves(GameModel* game);
 private:
 };

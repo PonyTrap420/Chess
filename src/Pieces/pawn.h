@@ -7,10 +7,10 @@ public:
 
 	inline Pawn(unsigned int x, unsigned int y, int team) : Piece(x,y,PAWN, team) {};
 
-	std::vector<sf::Vector2u> ShowMoves(Game* game);
+	std::vector<Move> ShowMoves(GameModel* game);
 	
-	inline void Move(unsigned int x, unsigned int y) override {
-		Piece::Move(x,y);
+	inline void MovePiece(unsigned int x, unsigned int y) override {
+		Piece::MovePiece(x,y);
 		if (m_firstMove)
 			m_firstMove = false;
 	}
