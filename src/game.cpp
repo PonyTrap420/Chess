@@ -116,9 +116,36 @@ void Game::MousePressed()
 				break;
 		}
 		m_state = DrawState::Board;
+
+		ResetBoard();
+		RunEnemy();
 	}
 	else{}
 		//newgame
+}
+
+void Game::RunEnemy()
+{
+	m_model->turn = !m_model->turn;
+
+	std::vector<Move> moves = m_model->GetAvailableMoves(0);
+	std::random_device rd;
+	std::mt19937 gen(rd());
+	std::uniform_int_distribution<int> dist(0, moves.size() - 1);
+
+	m_model->Search(3, INT_MIN, INT_MAX);
+
+	m_selected = m_model->m_nextMove.piece;
+	MovePiece(m_model->m_nextMove);
+	if (m_model->m_nextMove.captured->GetType() == KING)
+	{
+		m_state = DrawState::EndGame;
+		winner = BLACK;
+	}
+
+	m_model->turn = !m_model->turn;
+
+	m_model->ToString();
 }
 
 void Game::CellPressed(int row, int col)
@@ -132,6 +159,8 @@ void Game::CellPressed(int row, int col)
 		{
 			m_state = DrawState::EndGame;
 			winner = WHITE;
+			ResetBoard();
+			return;
 		}
 
 		Move m(row, col, m_selected);
@@ -140,30 +169,13 @@ void Game::CellPressed(int row, int col)
 		if (m_model->m_cells[row][col]->GetType() == PAWN && (m_model->m_cells[row][col]->GetTeam() == 0 && col == 7 || m_model->m_cells[row][col]->GetTeam() == 1 && col == 0))
 		{
 			m_state = DrawState::PieceMenu;
+			ResetBoard();
+			return;
 		}
 
 		ResetBoard();
 
-		m_model->turn = !m_model->turn;
-
-		std::vector<Move> moves = m_model->GetAvailableMoves(0);
-		std::random_device rd;
-		std::mt19937 gen(rd());
-		std::uniform_int_distribution<int> dist(0, moves.size() - 1);
-
-		m_model->Search(3, INT_MIN, INT_MAX);
-
-		m_selected = m_model->m_nextMove.piece;
-		MovePiece(m_model->m_nextMove);
-		if (m_model->m_nextMove.captured->GetType() == KING)
-		{
-			m_state = DrawState::EndGame;
-			winner = BLACK;
-		}
-		
-		m_model->turn = !m_model->turn;
-
-		m_model->ToString();
+		RunEnemy();
 
 		return;
 	}
@@ -232,8 +244,13 @@ void Game::ResetBoard() {
 				c = sf::Color(198, 222, 255, 255);
 
 			shape->setFillColor(c);
+
 		}
 	}
+
+	m_target->clear();
+	m_target->draw(*this);
+	m_target->display();
 }
 
 void Game::SwapPieces(Piece* p, Piece* p2)

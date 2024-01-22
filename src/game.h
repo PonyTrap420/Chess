@@ -34,6 +34,7 @@ private:
 	void MovePiece(Move& m);
 	void ResetBoard();
 	void SwapPieces(Piece* p, Piece* p2);
+	void RunEnemy();
 
 	sf::RenderWindow* m_target = nullptr;
 	unsigned int m_rows;

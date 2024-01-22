@@ -24,7 +24,6 @@ public:
 	std::vector<Piece*> white;
 	std::vector<Piece*> black;
 
-	std::stack<Move> m_moves;
 	Move m_nextMove;
 
 	bool turn = 1;

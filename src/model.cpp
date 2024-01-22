@@ -95,8 +95,6 @@ bool GameModel::ExecuteMove(Move& move)
 	{
 		//piece menu
 	}
-
-	m_moves.push(move);
 	turn = !turn;
 	return false;
 }
@@ -120,7 +118,6 @@ void GameModel::UnmakeMove(Move& move)
 
 	m_cells[move.x][move.y] = move.captured;
 
-	m_moves.pop();
 	turn = !turn;
 }
 
@@ -137,7 +134,7 @@ int GameModel::Search(int depth, int alpha, int beta)
 	{
 		ExecuteMove(move);
 		int eval = -Search(depth - 1, -beta, -alpha);
-		UnmakeMove(m_moves.top());
+		UnmakeMove(move);
 		if (eval >= beta)
 		{
 			return beta;
